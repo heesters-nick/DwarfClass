@@ -686,7 +686,9 @@ class ImageClassificationApp:
         Displays the image cutouts for the current object using the index from the randomized
         list of unclassified indices.
         """
+
         self.canvas.delete("all")
+
         # Check completion state first
         is_complete = self.random_index_ptr >= len(self.unclassified_indices)
 
@@ -695,20 +697,57 @@ class ImageClassificationApp:
             # Disable all controls first
             self.disable_all_controls()
 
-            # Then update the canvas with completion message
-            self.canvas.create_text(
-                self.composite_width // 2,
-                self.composite_height // 2,
-                text="All images classified!",
-                font=("Arial", 24),
-            )
+            # Create a celebratory completion image
+            try:
+                # Load and display the completion image
+                completion_img = Image.open(".done.jpg")
+
+                # Calculate dimensions to fit in canvas while preserving aspect ratio
+                canvas_width = self.master.winfo_width()
+                canvas_height = self.composite_height
+
+                # Resize image to fit canvas while maintaining aspect ratio
+                img_width, img_height = completion_img.size
+                scale = min(canvas_width / img_width, canvas_height / img_height)
+                new_width = int(img_width * scale)
+                new_height = int(img_height * scale)
+
+                completion_img = completion_img.resize(
+                    (new_width, new_height), Image.LANCZOS
+                )
+                self.completion_photo = ImageTk.PhotoImage(completion_img)
+
+                # Center the image on canvas
+                x_center = canvas_width // 2
+                y_center = canvas_height // 2
+
+                self.canvas.create_image(
+                    x_center, y_center, image=self.completion_photo, anchor=tk.CENTER
+                )
+
+                # Add completion text below the image
+                self.canvas.create_text(
+                    x_center,
+                    y_center + (new_height // 2) + 20,
+                    text="All images classified!",
+                    font=("Arial", 24),
+                    fill="black",
+                )
+            except FileNotFoundError:
+                # Fallback to text only if image not found
+                self.canvas.create_text(
+                    self.composite_width // 2,
+                    self.composite_height // 2,
+                    text="All images classified!",
+                    font=("Arial", 24),
+                )
             return
 
-        # Get the actual object index from the randomized list.
+        # Rest of the existing display_image code remains the same...
         current_obj_index = self.unclassified_indices[self.random_index_ptr]
         obj_id = self.h5_data["native"]["known_id"][current_obj_index].decode("utf-8")
 
-        # Create a blank composite image to serve as a canvas for the grid.
+        # Create a blank composite image to serve as a canvas for the grid
         composite = Image.new(
             "RGB", (self.composite_width, self.composite_height), color=(255, 255, 255)
         )
