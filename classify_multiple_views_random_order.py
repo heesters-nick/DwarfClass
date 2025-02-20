@@ -468,69 +468,46 @@ class ImageClassificationApp:
                 text="Currently classifying: Morphology (Press Enter to confirm)"
             )
 
-    # def setup_styles(self):
-    #     """Setup custom styles for the panels and buttons"""
-    #     style = ttk.Style()
-
-    #     # Active panel style
-    #     style.configure("Active.TLabelframe", background="white")
-    #     style.configure(
-    #         "Active.TLabelframe.Label",
-    #         background="white",
-    #         foreground="black",
-    #         font=("TkDefaultFont", 10, "bold"),
-    #     )
-
-    #     # Inactive panel style
-    #     style.configure("Inactive.TLabelframe", background="gray90")
-    #     style.configure(
-    #         "Inactive.TLabelframe.Label", background="gray90", foreground="gray50"
-    #     )
-
-    #     # Disabled panel style
-    #     style.configure("Disabled.TLabelframe", background="gray80")
-    #     style.configure(
-    #         "Disabled.TLabelframe.Label", background="gray80", foreground="gray60"
-    #     )
-
-    #     # Default button style - grey appearance
-    #     style.configure("TButton", background="gray90")
-
-    #     # Selected button style - blue appearance
-    #     style.configure("Selected.TButton", background="lightblue")
-    #     style.map(
-    #         "Selected.TButton",
-    #         background=[
-    #             ("active", "skyblue"),
-    #             ("disabled", "lightblue"),
-    #         ],  # Greyish light blue when disabled
-    #         foreground=[("disabled", "gray40")],  # Darker text when disabled
-    #     )
-
     def setup_styles(self):
         """Setup custom styles for the panels and buttons"""
         style = ttk.Style()
 
-        # Active panel style
-        style.configure("Active.TLabelframe", background="white")
+        # Active panel style with blue border
+        style.configure(
+            "Active.TLabelframe",
+            background="white",
+            borderwidth=2,  # Increase border width
+            relief="solid",  # Solid border style
+        )
         style.configure(
             "Active.TLabelframe.Label",
             background="white",
             foreground="black",
             font=("TkDefaultFont", 10, "bold"),
         )
+        # Add blue border around active panel
+        style.map(
+            "Active.TLabelframe",
+            bordercolor=[("!disabled", "#007bff")],  # Bootstrap-like blue
+        )
 
         # Inactive panel style
-        style.configure("Inactive.TLabelframe", background="gray90")
+        style.configure(
+            "Inactive.TLabelframe", background="gray90", borderwidth=1, relief="solid"
+        )
         style.configure(
             "Inactive.TLabelframe.Label", background="gray90", foreground="gray50"
         )
+        style.map("Inactive.TLabelframe", bordercolor=[("!disabled", "gray70")])
 
         # Disabled panel style
-        style.configure("Disabled.TLabelframe", background="gray80")
+        style.configure(
+            "Disabled.TLabelframe", background="gray80", borderwidth=1, relief="solid"
+        )
         style.configure(
             "Disabled.TLabelframe.Label", background="gray80", foreground="gray60"
         )
+        style.map("Disabled.TLabelframe", bordercolor=[("!disabled", "gray60")])
 
         # Default button style - grey appearance
         style.configure("TButton", background="gray90")
@@ -540,10 +517,8 @@ class ImageClassificationApp:
         style.map(
             "Selected.TButton",
             background=[("active", "skyblue"), ("disabled", "lightblue")],
-            relief=[
-                ("disabled", "sunken")
-            ],  # This helps with the "disabled" appearance
-            foreground=[("disabled", "gray50")],  # Grey text for disabled state
+            relief=[("disabled", "sunken")],
+            foreground=[("disabled", "gray50")],
         )
 
     def build_legacy_mapping(self, directory):
