@@ -1,0 +1,9 @@
+cutout_data/
+settings.json
+.vscode
+.ipynb_checkpoints/
+paper
+tables
+figures
+classification_results.csv
+notebooks
