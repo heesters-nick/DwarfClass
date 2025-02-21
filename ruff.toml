@@ -1,0 +1,14 @@
+line-length = 88
+
+[format]
+quote-style = "single"
+indent-style = "space"
+docstring-code-format = true
+
+[lint]
+select = ["I"]  # Enable isort rules for import sorting
+
+[lint.isort]
+case-sensitive = true
+combine-as-imports = true
+lines-after-imports = 3
