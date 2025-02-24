@@ -1047,7 +1047,7 @@ if __name__ == '__main__':
         legacy_dirs,
         csv_file,
         with_morphology=True,
-        show_object_id=False,
+        show_object_id=True,
     )
     app.setup_styles()
     root.mainloop()
