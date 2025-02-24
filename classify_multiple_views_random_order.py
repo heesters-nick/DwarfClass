@@ -67,21 +67,18 @@ class ImageClassificationApp:
         self.current_classification_mode = 'dwarf'  # Track which classification we're doing
 
         # Define morphology options
-        self.morphology_options = [
-            'dE',
-            'dEN',
-            'dIrr',
-        ]
+        self.morphology_options = ['dE', 'dEN', 'dI', 'dIN']
 
         # Define special features options
         self.special_features_options = [
-            'no',
+            'No',
             'GC',
-            'interacting',
+            'Interacting',
         ]
+        self.n_buttons = max(len(self.morphology_options), len(self.special_features_options))
 
         # Add current_special_feature to track the third question's answer
-        self.current_special_feature = 'no'  # Default to 'no'
+        self.current_special_feature = 'No'  # Default to 'No'
 
         # Make the main window expand
         self.master.grid_rowconfigure(0, weight=1)
@@ -148,7 +145,7 @@ class ImageClassificationApp:
                 writer = csv.writer(f)
                 writer.writerow(['known_id', 'label', 'morphology', 'special_feature', 'comment'])
                 for obj in self.h5_data['native']['known_id']:
-                    writer.writerow([obj.decode('utf-8'), '', '', 'no', ''])
+                    writer.writerow([obj.decode('utf-8'), '', '', 'No', ''])
 
     def get_unclassified_indices(self):
         """
@@ -336,14 +333,14 @@ class ImageClassificationApp:
 
     def reset_special_features(self):
         """Reset special features to default state"""
-        self.current_special_feature = 'no'
+        self.current_special_feature = 'No'
         for btn in self.special_features_buttons.values():
             btn.configure(style='TButton')
 
     def bind_keys(self):
         """Bind keyboard shortcuts"""
         # Bind number keys for classification
-        for i in range(1, 4):
+        for i in range(1, self.n_buttons + 1):
             self.master.bind(str(i), self.handle_key_press)
 
         # Bind Enter key for confirmation to main window
@@ -379,6 +376,8 @@ class ImageClassificationApp:
                 self.set_morphology(self.morphology_options[1])
             elif key == '3':
                 self.set_morphology(self.morphology_options[2])
+            elif key == '4':
+                self.set_morphology(self.morphology_options[3])
         elif self.current_classification_mode == 'special_features':
             if key == '1':
                 self.set_special_feature(self.special_features_options[0])  # no
@@ -454,8 +453,8 @@ class ImageClassificationApp:
 
         # Transition to special features classification
         self.current_classification_mode = 'special_features'
-        self.current_special_feature = 'no'
-        self.special_features_buttons['no'].configure(style='Selected.TButton')
+        self.current_special_feature = 'No'
+        self.special_features_buttons['No'].configure(style='Selected.TButton')
         self.update_panel_states('special_features')
 
     def handle_classification(self, value):
@@ -479,7 +478,7 @@ class ImageClassificationApp:
 
         if value == 0 or not self.with_morphology:
             self.current_morphology = None
-            self.current_special_feature = 'no'
+            self.current_special_feature = 'No'
             # If morphology is disabled, don't try to change modes
             if not self.with_morphology:
                 return
