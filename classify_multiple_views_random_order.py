@@ -1015,7 +1015,8 @@ class ImageClassificationApp:
 
 if __name__ == '__main__':
     # Adjust these paths to match your own setup
-    h5_data_dir = '/home/nick/astro/dwarf_visualization/cutout_data/training_data'
+    h5_data_dir = '/home/nick/astro/dwarf_visualization/cutout_data/training_data/h5'
+    legacy_data_dir = '/home/nick/astro/dwarf_visualization/cutout_data/training_data/legacy'
 
     # HDF5 files for the four preprocessed versions
     h5_paths = {
@@ -1032,8 +1033,8 @@ if __name__ == '__main__':
 
     # Optional: directories for the legacy JPEG images
     legacy_dirs = {
-        'legacy_context': os.path.join(h5_data_dir, 'train_cutouts_legacy'),
-        'legacy_enhanced': os.path.join(h5_data_dir, 'train_cutouts_legacy_enh'),
+        'legacy_context': os.path.join(legacy_data_dir, 'train_cutouts_legacy'),
+        'legacy_enhanced': os.path.join(legacy_data_dir, 'train_cutouts_legacy_enh'),
     }
 
     # Output CSV file

@@ -44,15 +44,17 @@ cd DwarfClass
     - h5_data_dir (should contain all of your files ening in .h5)
     - legacy_data_dir (should contain train_cutouts_legacy and train_cutouts_legacy_enh subdirectories)
 
-2. Start the application
+3. Start the application:
+  - `python classify_multiple_views_random_order.py`
 
-3. Classification Process:
+4. Classification Process:
     - Answer whether the image shows a dwarf galaxy (No/Maybe/Yes)
     - If "Maybe" or "Yes", classify the morphology (dE, dEN, dI, dIN)
     - Identify any special features (Globular Clusters (GCs), interacting/tidally disturbed, defaults to "No")
     - Add optional comments in the comment box
     - Finally, confirm classifications with Enter key
-4. Navigation:
+    
+5. Navigation:
     - Press Enter to confirm and move to next image
     - If you have made a mistake: press ESC to reset current classification
     - Type in comment box and press Enter to confirm if all other classifications are complete
