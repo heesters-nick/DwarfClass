@@ -604,7 +604,7 @@ class ImageClassificationApp:
         window_height = max(600, self.master.winfo_height())
 
         # Reserve more space for classification buttons to avoid overlap
-        button_space = 150  # Increased from 50 to give more room for buttons
+        button_space = 200
 
         # Calculate spacing
         total_horizontal_spacing = self.horizontal_spacing * (self.num_cols - 1)
