@@ -63,9 +63,7 @@ class ImageClassificationApp:
 
         self.current_morphology = None
         self.current_value = None
-        self.current_classification_mode = (
-            'dwarf'  # Track which classification we're doing
-        )
+        self.current_classification_mode = 'dwarf'  # Track which classification we're doing
 
         # Define morphology options
         self.morphology_options = [
@@ -73,6 +71,16 @@ class ImageClassificationApp:
             'dEN',
             'dIrr',
         ]
+
+        # Define special features options
+        self.special_features_options = [
+            'no',
+            'GC',
+            'interacting',
+        ]
+
+        # Add current_special_feature to track the third question's answer
+        self.current_special_feature = 'no'  # Default to 'no'
 
         # Make the main window expand
         self.master.grid_rowconfigure(0, weight=1)
@@ -114,7 +122,6 @@ class ImageClassificationApp:
             'legacy_enhanced',
         ]
 
-        self.total_images = len(self.h5_data['native']['known_id'])
         self.update_title()
 
         # Create canvas to display images
@@ -138,9 +145,9 @@ class ImageClassificationApp:
         if not os.path.exists(self.csv_file):
             with open(self.csv_file, 'w', newline='') as f:
                 writer = csv.writer(f)
-                writer.writerow(['known_id', 'label', 'morphology', 'comment'])
+                writer.writerow(['known_id', 'label', 'morphology', 'special_feature', 'comment'])
                 for obj in self.h5_data['native']['known_id']:
-                    writer.writerow([obj.decode('utf-8'), '', '', ''])
+                    writer.writerow([obj.decode('utf-8'), '', '', 'no', ''])
 
     def get_unclassified_indices(self):
         """
@@ -163,9 +170,7 @@ class ImageClassificationApp:
                     unclassified.append(i)
                 else:
                     if label == '0':
-                        if (
-                            morphology != ''
-                        ):  # Should be blank for a valid classification
+                        if morphology != '':  # Should be blank for a valid classification
                             unclassified.append(i)
                     else:
                         if morphology == '':  # Must be filled if label is nonzero
@@ -187,7 +192,7 @@ class ImageClassificationApp:
         # Add status label
         self.status_label = ttk.Label(
             self.button_frame,
-            text='Currently classifying: Dwarf status (Press Enter to confirm)',
+            text='Currently classifying: Dwarf status',
             anchor='center',
         )
         self.status_label.grid(row=0, column=0, columnspan=4, sticky='ew', pady=(5, 5))
@@ -211,9 +216,7 @@ class ImageClassificationApp:
         self.comment_box.bind('<Return>', self.handle_enter)
 
         # Create primary classification panel
-        self.primary_panel = ttk.LabelFrame(
-            panels_container, text='Is this a dwarf galaxy?'
-        )
+        self.primary_panel = ttk.LabelFrame(panels_container, text='Is this a dwarf galaxy?')
         self.primary_panel.pack(fill='x', pady=(0, 5))
 
         # Create dwarf classification buttons
@@ -221,11 +224,17 @@ class ImageClassificationApp:
 
         # Create morphology panel if enabled
         if self.with_morphology:
-            self.morphology_panel = ttk.LabelFrame(
-                panels_container, text='What is the morphology?'
-            )
+            self.morphology_panel = ttk.LabelFrame(panels_container, text='What is the morphology?')
             self.morphology_panel.pack(fill='x', pady=(5, 0))
             self.create_morphology_buttons()
+
+        # Create special features panel
+        self.special_features_panel = ttk.LabelFrame(panels_container, text='Any special features?')
+        self.special_features_panel.pack(fill='x', pady=(5, 0))
+        self.create_special_features_buttons()
+
+        if self.with_morphology:
+            self.update_panel_states('primary')
 
     def handle_tab(self, event):
         """Handle Tab key in comment box to move focus to main window"""
@@ -291,8 +300,44 @@ class ImageClassificationApp:
             btn.grid(row=0, column=i, padx=10)
             self.morph_buttons[morph] = btn
 
-        if self.with_morphology:
-            self.update_panel_states('primary')
+    def create_special_features_buttons(self):
+        """Create buttons for special features classification"""
+        special_features_frame = ttk.Frame(self.special_features_panel)
+        special_features_frame.pack(fill='x', padx=20, pady=10)
+
+        for i in range(len(self.special_features_options)):
+            special_features_frame.columnconfigure(i, weight=1)
+
+        button_width = 15
+
+        self.special_features_buttons = {}
+        for i, feature in enumerate(self.special_features_options):
+            btn = ttk.Button(
+                special_features_frame,
+                text=f'{feature} ({i + 1})',
+                command=lambda f=feature: self.set_special_feature(f),
+                width=button_width,
+                style='TButton',
+            )
+            btn.grid(row=0, column=i, padx=10)
+            self.special_features_buttons[feature] = btn
+
+    def set_special_feature(self, feature):
+        """Set the current special feature selection"""
+        self.current_special_feature = feature
+
+        # Reset all special feature button styles
+        for btn in self.special_features_buttons.values():
+            btn.configure(style='TButton')
+
+        # Highlight selected button
+        self.special_features_buttons[feature].configure(style='Selected.TButton')
+
+    def reset_special_features(self):
+        """Reset special features to default state"""
+        self.current_special_feature = 'no'
+        for btn in self.special_features_buttons.values():
+            btn.configure(style='TButton')
 
     def bind_keys(self):
         """Bind keyboard shortcuts"""
@@ -333,6 +378,13 @@ class ImageClassificationApp:
                 self.set_morphology(self.morphology_options[1])
             elif key == '3':
                 self.set_morphology(self.morphology_options[2])
+        elif self.current_classification_mode == 'special_features':
+            if key == '1':
+                self.set_special_feature(self.special_features_options[0])  # no
+            elif key == '2':
+                self.set_special_feature(self.special_features_options[1])  # GC
+            elif key == '3':
+                self.set_special_feature(self.special_features_options[2])  # interacting
 
     def handle_enter(self, event):
         """Handle Enter key press for confirming classifications"""
@@ -344,9 +396,7 @@ class ImageClassificationApp:
         can_save = self.current_value is not None and (
             self.current_value == 0  # No dwarf
             or not self.with_morphology  # Morphology disabled
-            or (
-                self.with_morphology and self.current_morphology is not None
-            )  # Has morphology
+            or (self.with_morphology and self.current_morphology is not None)  # Has morphology
         )
 
         if can_save:
@@ -379,6 +429,7 @@ class ImageClassificationApp:
         # Reset classification values
         self.current_value = None
         self.current_morphology = None if self.with_morphology else None
+        self.reset_special_features()
 
         # Return to dwarf classification mode
         self.current_classification_mode = 'dwarf'
@@ -386,7 +437,7 @@ class ImageClassificationApp:
 
         # Update status label to reflect reset
         self.status_label.configure(
-            text='Classifications reset. Currently classifying: Dwarf status (Press Enter to confirm)'
+            text='Classifications reset. Currently classifying: Dwarf status'
         )
 
     def set_morphology(self, morphology):
@@ -400,6 +451,12 @@ class ImageClassificationApp:
         # Highlight selected button
         self.morph_buttons[morphology].configure(style='Selected.TButton')
 
+        # Transition to special features classification
+        self.current_classification_mode = 'special_features'
+        self.current_special_feature = 'no'
+        self.special_features_buttons['no'].configure(style='Selected.TButton')
+        self.update_panel_states('special_features')
+
     def handle_classification(self, value):
         """Handle dwarf classification"""
         self.current_value = value
@@ -411,6 +468,9 @@ class ImageClassificationApp:
         # Highlight selected button
         if value == 0:
             self.no_dwarf_button.configure(style='Selected.TButton')
+            self.status_label.configure(
+                text='Currently classifying: Dwarf status (Press Enter to confirm)'
+            )
         elif value == 0.5:
             self.maybe_dwarf_button.configure(style='Selected.TButton')
         else:
@@ -418,6 +478,7 @@ class ImageClassificationApp:
 
         if value == 0 or not self.with_morphology:
             self.current_morphology = None
+            self.current_special_feature = 'no'
             # If morphology is disabled, don't try to change modes
             if not self.with_morphology:
                 return
@@ -430,43 +491,53 @@ class ImageClassificationApp:
         if not self.with_morphology:
             return
 
+        # Reset all panel styles to inactive first
+        self.primary_panel.configure(style='Inactive.TLabelframe')
+        self.morphology_panel.configure(style='Inactive.TLabelframe')
+        self.special_features_panel.configure(style='Inactive.TLabelframe')
+
         if active_panel == 'primary':
             self.current_classification_mode = 'dwarf'
             # Enable primary panel buttons
-            for btn in [
-                self.no_dwarf_button,
-                self.maybe_dwarf_button,
-                self.dwarf_button,
-            ]:
+            for btn in [self.no_dwarf_button, self.maybe_dwarf_button, self.dwarf_button]:
                 btn.state(['!disabled'])
             # Disable morphology panel buttons
             for btn in self.morph_buttons.values():
                 btn.state(['disabled'])
-
-            self.primary_panel.configure(style='Active.TLabelframe')
-            self.morphology_panel.configure(style='Inactive.TLabelframe')
-            self.status_label.configure(
-                text='Currently classifying: Dwarf status (Press Enter to confirm)'
-            )
-        else:
-            self.current_classification_mode = 'morphology'
-            # Disable primary panel buttons but maintain selected style
-            for btn in [
-                self.no_dwarf_button,
-                self.maybe_dwarf_button,
-                self.dwarf_button,
-            ]:
-                # Don't change the style, just disable the button
+            # Disable special features buttons
+            for btn in self.special_features_buttons.values():
                 btn.state(['disabled'])
 
+            self.primary_panel.configure(style='Active.TLabelframe')
+            self.status_label.configure(text='Currently classifying: Dwarf status')
+
+        elif active_panel == 'morphology':
+            self.current_classification_mode = 'morphology'
+            # Disable primary panel buttons
+            for btn in [self.no_dwarf_button, self.maybe_dwarf_button, self.dwarf_button]:
+                btn.state(['disabled'])
             # Enable morphology panel buttons
             for btn in self.morph_buttons.values():
                 btn.state(['!disabled'])
+            # Disable special features buttons
+            for btn in self.special_features_buttons.values():
+                btn.state(['disabled'])
 
-            self.primary_panel.configure(style='Inactive.TLabelframe')
             self.morphology_panel.configure(style='Active.TLabelframe')
+            self.status_label.configure(text='Currently classifying: Morphology')
+
+        else:  # special_features
+            self.current_classification_mode = 'special_features'
+            # Disable morphology buttons
+            for btn in self.morph_buttons.values():
+                btn.state(['disabled'])
+            # Enable special features buttons
+            for btn in self.special_features_buttons.values():
+                btn.state(['!disabled'])
+
+            self.special_features_panel.configure(style='Active.TLabelframe')
             self.status_label.configure(
-                text='Currently classifying: Morphology (Press Enter to confirm)'
+                text='Currently classifying: Special features (press Enter to confirm)'
             )
 
     def setup_styles(self):
@@ -493,21 +564,13 @@ class ImageClassificationApp:
         )
 
         # Inactive panel style
-        style.configure(
-            'Inactive.TLabelframe', background='gray90', borderwidth=1, relief='solid'
-        )
-        style.configure(
-            'Inactive.TLabelframe.Label', background='gray90', foreground='gray50'
-        )
+        style.configure('Inactive.TLabelframe', background='gray90', borderwidth=1, relief='solid')
+        style.configure('Inactive.TLabelframe.Label', background='gray90', foreground='gray50')
         style.map('Inactive.TLabelframe', bordercolor=[('!disabled', 'gray70')])
 
         # Disabled panel style
-        style.configure(
-            'Disabled.TLabelframe', background='gray80', borderwidth=1, relief='solid'
-        )
-        style.configure(
-            'Disabled.TLabelframe.Label', background='gray80', foreground='gray60'
-        )
+        style.configure('Disabled.TLabelframe', background='gray80', borderwidth=1, relief='solid')
+        style.configure('Disabled.TLabelframe.Label', background='gray80', foreground='gray60')
         style.map('Disabled.TLabelframe', bordercolor=[('!disabled', 'gray60')])
 
         # Default button style - grey appearance
@@ -560,12 +623,8 @@ class ImageClassificationApp:
         self.cell_height = cell_size
 
         # Total composite dimensions
-        self.composite_width = (
-            self.cell_width * self.num_cols
-        ) + total_horizontal_spacing
-        self.composite_height = (
-            self.cell_height * self.num_rows
-        ) + total_vertical_spacing
+        self.composite_width = (self.cell_width * self.num_cols) + total_horizontal_spacing
+        self.composite_height = (self.cell_height * self.num_rows) + total_vertical_spacing
 
     def on_resize(self, event):
         """
@@ -590,9 +649,7 @@ class ImageClassificationApp:
                 label = row[1].strip()
                 morphology = row[2].strip() if len(row) > 2 else ''
                 # A valid classification has a non-empty label and (if label is nonzero) a non-empty morphology.
-                if label and (
-                    (label == '0' and morphology == '') or (label != '0' and morphology)
-                ):
+                if label and ((label == '0' and morphology == '') or (label != '0' and morphology)):
                     valid += 1
         return valid
 
@@ -606,18 +663,14 @@ class ImageClassificationApp:
 
         # Get current object ID from the randomized list
         current_obj_index = self.unclassified_indices[self.random_index_ptr]
-        current_obj_id = self.h5_data['native']['known_id'][current_obj_index].decode(
-            'utf-8'
-        )
+        current_obj_id = self.h5_data['native']['known_id'][current_obj_index].decode('utf-8')
 
         if self.show_object_id:
             self.master.title(
                 f'Classifying {current_obj_id} ({valid_count + 1}/{self.total_images})'
             )
         else:
-            self.master.title(
-                f'Classifying object {valid_count + 1}/{self.total_images}'
-            )
+            self.master.title(f'Classifying object {valid_count + 1}/{self.total_images}')
 
     def resize_preserve_aspect(self, pil_img, max_width, max_height):
         original_width, original_height = pil_img.size
@@ -758,9 +811,7 @@ class ImageClassificationApp:
                             (self.cell_width, self.cell_height),
                             (200, 200, 200),  # type: ignore
                         )
-                        ImageDraw.Draw(pil_img).text(
-                            (10, 10), 'Error loading', fill='red'
-                        )
+                        ImageDraw.Draw(pil_img).text((10, 10), 'Error loading', fill='red')
                 else:
                     pil_img = Image.new(
                         'RGB',
@@ -775,9 +826,7 @@ class ImageClassificationApp:
                     (255, 0, 0),  # type: ignore
                 )
 
-            pil_img = self.resize_preserve_aspect(
-                pil_img, self.cell_width, self.cell_height
-            )
+            pil_img = self.resize_preserve_aspect(pil_img, self.cell_width, self.cell_height)
             cell_img = Image.new(
                 'RGB',
                 (self.cell_width, self.cell_height),
@@ -813,7 +862,12 @@ class ImageClassificationApp:
 
         # Update the CSV row corresponding to this object.
         self.update_csv_row(
-            current_obj_index, obj_id, self.current_value, morphology, comment
+            current_obj_index,
+            obj_id,
+            self.current_value,
+            morphology,
+            self.current_special_feature,
+            comment,
         )
 
         # Reset button styles and fields as before.
@@ -823,10 +877,18 @@ class ImageClassificationApp:
         if self.with_morphology:
             for btn in self.morph_buttons.values():
                 btn.configure(style='TButton')
+        # Reset special features
+        self.reset_special_features()
+
+        # Reset classification values
         self.current_value = None
         self.current_morphology = None if self.with_morphology else None
         self.current_classification_mode = 'dwarf'
+
+        # Clear the comment box
         self.comment_box.delete('1.0', tk.END)
+
+        # Reset the focus to the main window
         self.master.focus_set()
 
         # Advance to the next object.
@@ -841,11 +903,11 @@ class ImageClassificationApp:
             self.update_title()
             self.display_image()
             self.update_panel_states('primary')
-            self.status_label.configure(
-                text='Currently classifying: Dwarf status (Press Enter to confirm)'
-            )
+            self.status_label.configure(text='Currently classifying: Dwarf status')
 
-    def update_csv_row(self, row_index, known_id, classification, morphology, comment):
+    def update_csv_row(
+        self, row_index, known_id, classification, morphology, special_feature, comment
+    ):
         """
         Updates the CSV file in place with additional ID verification.
 
@@ -854,6 +916,7 @@ class ImageClassificationApp:
             known_id: ID of the object being classified
             classification: Classification value (0, 0.5, or 1)
             morphology: Morphology classification (if applicable)
+            special_feature: Special feature classification
             comment: User comment
 
         Raises:
@@ -874,7 +937,7 @@ class ImageClassificationApp:
             )
 
         # If verification passes, proceed with update
-        new_row = [known_id, str(classification), morphology, comment]
+        new_row = [known_id, str(classification), morphology, special_feature, comment]
         reader[row_index + 1] = new_row
 
         with open(self.csv_file, 'w', newline='') as f:
@@ -907,6 +970,15 @@ class ImageClassificationApp:
                     btn.configure(style='Disabled.TButton')
                 btn['command'] = ''
 
+        # Disable special features buttons
+        for btn in self.special_features_buttons.values():
+            btn.state(['disabled'])
+            if btn['style'] == 'Selected.TButton':
+                btn.configure(style='Selected.Disabled.TButton')
+            else:
+                btn.configure(style='Disabled.TButton')
+            btn['command'] = ''
+
         # Disable comment box and grey it out
         self.comment_box.configure(state='disabled', background='gray80')
 
@@ -926,9 +998,7 @@ class ImageClassificationApp:
         self.handle_key_press = lambda x: None  # type: ignore
 
         # Update status label
-        self.status_label.configure(
-            text='All images have been classified!', foreground='gray50'
-        )
+        self.status_label.configure(text='All images have been classified!', foreground='gray50')
 
 
 if __name__ == '__main__':
