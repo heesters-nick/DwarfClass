@@ -42,9 +42,7 @@ class ImageClassificationApp:
         self.current_index = self.get_last_index()
         self.current_morphology = None
         self.current_value = None
-        self.current_classification_mode = (
-            'dwarf'  # Track which classification we're doing
-        )
+        self.current_classification_mode = 'dwarf'  # Track which classification we're doing
 
         # Define morphology options
         self.morphology_options = [
@@ -148,9 +146,7 @@ class ImageClassificationApp:
         self.comment_box.bind('<Return>', self.handle_enter)
 
         # Create primary classification panel
-        self.primary_panel = ttk.LabelFrame(
-            panels_container, text='Is this a dwarf galaxy?'
-        )
+        self.primary_panel = ttk.LabelFrame(panels_container, text='Is this a dwarf galaxy?')
         self.primary_panel.pack(fill='x', pady=(0, 5))
 
         # Create dwarf classification buttons
@@ -158,9 +154,7 @@ class ImageClassificationApp:
 
         # Create morphology panel if enabled
         if self.with_morphology:
-            self.morphology_panel = ttk.LabelFrame(
-                panels_container, text='What is the morphology?'
-            )
+            self.morphology_panel = ttk.LabelFrame(panels_container, text='What is the morphology?')
             self.morphology_panel.pack(fill='x', pady=(5, 0))
             self.create_morphology_buttons()
 
@@ -280,9 +274,7 @@ class ImageClassificationApp:
         can_save = self.current_value is not None and (
             self.current_value == 0  # No dwarf
             or not self.with_morphology  # Morphology disabled
-            or (
-                self.with_morphology and self.current_morphology is not None
-            )  # Has morphology
+            or (self.with_morphology and self.current_morphology is not None)  # Has morphology
         )
 
         if can_save:
@@ -425,9 +417,7 @@ class ImageClassificationApp:
 
         # Inactive panel style
         style.configure('Inactive.TLabelframe', background='gray90')
-        style.configure(
-            'Inactive.TLabelframe.Label', background='gray90', foreground='gray50'
-        )
+        style.configure('Inactive.TLabelframe.Label', background='gray90', foreground='gray50')
 
         # Selected button styles - both enabled and disabled states
         style.configure('Selected.TButton', background='lightblue')
@@ -505,12 +495,8 @@ class ImageClassificationApp:
         self.cell_height = cell_size
 
         # Total composite dimensions
-        self.composite_width = (
-            self.cell_width * self.num_cols
-        ) + total_horizontal_spacing
-        self.composite_height = (
-            self.cell_height * self.num_rows
-        ) + total_vertical_spacing
+        self.composite_width = (self.cell_width * self.num_cols) + total_horizontal_spacing
+        self.composite_height = (self.cell_height * self.num_rows) + total_vertical_spacing
 
     def on_resize(self, event):
         """
@@ -597,9 +583,7 @@ class ImageClassificationApp:
 
         # Try to load a TTF font, else fallback
         try:
-            font = ImageFont.truetype(
-                '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 16
-            )
+            font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 16)
         except:  # noqa: E722
             font = ImageFont.load_default()
 
@@ -644,9 +628,7 @@ class ImageClassificationApp:
                         (self.cell_width, self.cell_height),
                         (220, 220, 220),  # type: ignore
                     )
-                    ImageDraw.Draw(pil_img).text(
-                        (10, 10), 'Not found', fill='red', font=font
-                    )
+                    ImageDraw.Draw(pil_img).text((10, 10), 'Not found', fill='red', font=font)
             else:
                 pil_img = Image.new(
                     'RGB',
@@ -655,9 +637,7 @@ class ImageClassificationApp:
                 )
 
             # Resize preserving aspect ratio
-            pil_img = self.resize_preserve_aspect(
-                pil_img, self.cell_width, self.cell_height
-            )
+            pil_img = self.resize_preserve_aspect(pil_img, self.cell_width, self.cell_height)
 
             # Create a blank cell and center the resized image
             cell_img = Image.new(
@@ -683,9 +663,7 @@ class ImageClassificationApp:
 
     def save_classification(self):
         """Save the classification and prepare for next image"""
-        cutout_name = self.h5_data['native']['known_id'][self.current_index].decode(
-            'utf-8'
-        )
+        cutout_name = self.h5_data['native']['known_id'][self.current_index].decode('utf-8')
 
         # Get the comment text
         comment = self.comment_box.get('1.0', tk.END).strip()
@@ -766,8 +744,6 @@ if __name__ == '__main__':
 
     # Create and run the application
     root = tk.Tk()
-    app = ImageClassificationApp(
-        root, h5_data, legacy_dirs, csv_file, with_morphology=True
-    )
+    app = ImageClassificationApp(root, h5_data, legacy_dirs, csv_file, with_morphology=True)
     app.setup_styles()
     root.mainloop()

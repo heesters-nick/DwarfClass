@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image, ImageDraw, ImageTk
 from astropy.visualization import simple_norm
+from filelock import FileLock
 
 
 def read_h5(file_path):
@@ -909,40 +910,51 @@ class ImageClassificationApp:
         self, row_index, known_id, classification, morphology, special_feature, comment
     ):
         """
-        Updates the CSV file in place with additional ID verification.
+        Safely updates the CSV file in place with a file lock and atomic file replacement.
+        This method reads the CSV file, verifies that the row at the given index matches the expected known_id,
+        updates the row, and writes the file back to disk.
 
         Args:
-            row_index: Index of the object in the h5 file
-            known_id: ID of the object being classified
-            classification: Classification value (0, 0.5, or 1)
-            morphology: Morphology classification (if applicable)
-            special_feature: Special feature classification
-            comment: User comment
+            row_index: Index of the object in the h5 file (0-indexed, not including header).
+            known_id: ID of the object being classified.
+            classification: Classification value (0, 0.5, or 1).
+            morphology: Morphology classification (if applicable). Should be an empty string if classification is 0.
+            special_feature: Special feature classification.
+            comment: User comment.
 
         Raises:
-            ValueError: If the row_index doesn't correspond to the expected object ID
+            ValueError: If the row_index does not correspond to the expected object ID.
+            Exception: If the file lock cannot be acquired within the timeout.
         """
-        with open(self.csv_file, 'r', newline='') as f:
-            reader = list(csv.reader(f))
+        lock_path = self.csv_file + '.lock'
+        lock = FileLock(lock_path, timeout=10)
+        with lock:
+            # Read the CSV file into memory
+            with open(self.csv_file, 'r', newline='') as f:
+                reader = list(csv.reader(f))
 
-        # Verify the ID at the target row matches our expected ID
-        target_row = reader[row_index + 1]  # +1 for header
-        existing_id = target_row[0]
+            # Verify the target row's known_id
+            target_row = reader[row_index + 1]  # +1 to account for header row
+            existing_id = target_row[0]
+            if existing_id != known_id:
+                raise ValueError(
+                    f'ID mismatch at row {row_index + 1}: '
+                    f"Expected '{known_id}', found '{existing_id}'. "
+                    'This indicates a potential synchronization issue between the data and CSV.'
+                )
 
-        if existing_id != known_id:
-            raise ValueError(
-                f'ID mismatch at row {row_index + 1}: '
-                f"Expected '{known_id}', found '{existing_id}'. "
-                'This indicates a potential synchronization issue between the data and CSV.'
-            )
+            # Prepare the updated row and update the CSV content in memory
+            new_row = [known_id, str(classification), morphology, special_feature, comment]
+            reader[row_index + 1] = new_row
 
-        # If verification passes, proceed with update
-        new_row = [known_id, str(classification), morphology, special_feature, comment]
-        reader[row_index + 1] = new_row
+            # Write out to a temporary file first to ensure atomic replacement
+            temp_csv = self.csv_file + '.tmp'
+            with open(temp_csv, 'w', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerows(reader)
 
-        with open(self.csv_file, 'w', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerows(reader)
+            # Replace the original CSV with the temporary file
+            os.replace(temp_csv, self.csv_file)
 
     def disable_all_controls(self):
         """Disable all buttons, comment box, and key bindings when classification is complete"""

@@ -8,3 +8,4 @@ figures
 classification_results.csv
 notebooks
 ruff.toml
+*.lock
