@@ -42,7 +42,7 @@ cd DwarfClass
     - train_cutouts_legacy/
     - train_cutouts_legacy_enh/
 
-3. Update data paths:
+3. Update local data paths in the script `classify_multiple_views_random_order.py`:
     - h5_data_dir (should contain all of your files ening in .h5)
     - legacy_data_dir (should contain train_cutouts_legacy and train_cutouts_legacy_enh subdirectories)
 
@@ -78,4 +78,11 @@ cd DwarfClass
 - **Efficient Workflow**: Default "No" for special features allows quick progression through typical cases
 - **Flexible Input**: Complete control over classification process with ability to correct mistakes
 
+## Morphology examples from MATLAS
 
+- Remarks:
+  - There are only very few examples for nucleated dwarf irregulars (dIN) in MATLAS
+  - The colors in the Legacy survey images should not be relied upon for morphological classification; all dwarfs look blue in these images
+  
+
+![DwarfClass Interface](images/morph_examples.png)
