@@ -695,10 +695,26 @@ class ImageClassificationApp:
         ax.set_axis_off()
         fig.add_axes(ax)
 
+        # Check if the data is valid for normalization
+        if np.all(np.isnan(cutout)) or (np.max(cutout) - np.min(cutout) < 1e-10):
+            # Handle the case of all NaN or all same values
+            gray_array = np.full((100, 100), 128, dtype=np.uint8)
+            # Convert directly to PIL Image
+            return Image.fromarray(gray_array, mode='L')
+
         # Create plot with normalization
         with np.errstate(divide='ignore', invalid='ignore'):
-            norm = simple_norm(cutout, 'asinh', percent=95.0)
-            ax.imshow(cutout, cmap='gray_r', norm=norm, origin='lower')  # type: ignore
+            try:
+                norm = simple_norm(cutout, 'asinh', percent=95.0)
+                cutout_safe = np.nan_to_num(cutout, nan=0, posinf=1, neginf=0)
+                ax.imshow(cutout_safe, cmap='gray_r', norm=norm, origin='lower')  # type: ignore
+            except Exception as e:
+                print(f'Error in normalization: {e}')
+                # Fallback to simple scaling without fancy normalization
+                vmin, vmax = np.nanmin(cutout), np.nanmax(cutout)
+                if vmin == vmax:
+                    vmin, vmax = 0, 1  # Avoid division by zero
+                ax.imshow(cutout, cmap='gray_r', vmin=vmin, vmax=vmax, origin='lower')
 
         # Save to memory buffer
         buf = io.BytesIO()
