@@ -42,7 +42,7 @@ cd DwarfClass
     - train_cutouts_legacy/
     - train_cutouts_legacy_enh/
 
-3. Update local data paths in the script `classify_multiple_views_random_order.py`:
+3. Update local data paths in the script `classify_multiple_views_random_order.py` under `if __name__ == '__main__':`:
     - h5_data_dir (should contain all of your files ening in .h5)
     - legacy_data_dir (should contain train_cutouts_legacy and train_cutouts_legacy_enh subdirectories)
 
