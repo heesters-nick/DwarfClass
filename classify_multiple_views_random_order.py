@@ -729,7 +729,7 @@ class ImageClassificationApp:
             # Create a celebratory completion image
             try:
                 # Load and display the completion image
-                completion_img = Image.open('.done.jpg')
+                completion_img = Image.open('images/.done.jpg')
 
                 # Calculate dimensions to fit in canvas while preserving aspect ratio
                 canvas_width = self.master.winfo_width()
@@ -756,13 +756,13 @@ class ImageClassificationApp:
                 )
 
                 # Add completion text below the image
-                self.canvas.create_text(
-                    x_center,
-                    y_center + (new_height // 2) + 20,
-                    text='All images classified!',
-                    font=('Arial', 24),
-                    fill='black',
-                )
+                # self.canvas.create_text(
+                #     x_center,
+                #     y_center + (new_height // 2) + 20,
+                #     text='All images classified!',
+                #     font=('Arial', 24),
+                #     fill='black',
+                # )
             except FileNotFoundError:
                 # Fallback to text only if image not found
                 self.canvas.create_text(
@@ -1047,7 +1047,7 @@ if __name__ == '__main__':
         legacy_dirs,
         csv_file,
         with_morphology=True,
-        show_object_id=True,
+        show_object_id=False,
     )
     app.setup_styles()
     root.mainloop()
