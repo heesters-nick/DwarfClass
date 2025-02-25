@@ -249,14 +249,14 @@ class ImageClassificationApp:
 
         button_width = 15
 
-        self.no_dwarf_button = ttk.Button(
+        self.dwarf_button = ttk.Button(
             primary_buttons_frame,
-            text='No Dwarf (1)',
-            command=lambda: self.handle_classification(0),
+            text='Dwarf (1)',
+            command=lambda: self.handle_classification(1),
             width=button_width,
             style='TButton',
         )
-        self.no_dwarf_button.grid(row=0, column=0, padx=10)
+        self.dwarf_button.grid(row=0, column=0, padx=10)
 
         self.maybe_dwarf_button = ttk.Button(
             primary_buttons_frame,
@@ -267,14 +267,14 @@ class ImageClassificationApp:
         )
         self.maybe_dwarf_button.grid(row=0, column=1, padx=10)
 
-        self.dwarf_button = ttk.Button(
+        self.no_dwarf_button = ttk.Button(
             primary_buttons_frame,
-            text='Dwarf (3)',
-            command=lambda: self.handle_classification(1),
+            text='No Dwarf (3)',
+            command=lambda: self.handle_classification(0),
             width=button_width,
             style='TButton',
         )
-        self.dwarf_button.grid(row=0, column=2, padx=10)
+        self.no_dwarf_button.grid(row=0, column=2, padx=10)
 
     def create_morphology_buttons(self):
         """Create buttons for morphology classification"""
@@ -364,11 +364,11 @@ class ImageClassificationApp:
 
         if self.current_classification_mode == 'dwarf':
             if key == '1':
-                self.handle_classification(0)
+                self.handle_classification(1)
             elif key == '2':
                 self.handle_classification(0.5)
             elif key == '3':
-                self.handle_classification(1)
+                self.handle_classification(0)
         elif self.current_classification_mode == 'morphology':
             if key == '1':
                 self.set_morphology(self.morphology_options[0])
@@ -1047,7 +1047,7 @@ if __name__ == '__main__':
         legacy_dirs,
         csv_file,
         with_morphology=True,
-        show_object_id=False,
+        show_object_id=True,
     )
     app.setup_styles()
     root.mainloop()

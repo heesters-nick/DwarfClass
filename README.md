@@ -4,11 +4,12 @@ DwarfClass is a specialized tool for generating expert labels of dwarf galaxies.
 ## Features
 
 - Sequential classification workflow with three main questions:
-  1. Dwarf galaxy identification (No/Maybe/Yes)
+  1. Dwarf galaxy identification (Yes/Maybe/No)
   2. Morphology classification (for "Maybe" or "Yes" responses)
   3. Special features identification (defaults to "No" for efficiency)
 
 - User-friendly interface features:
+  - You can use your mouse/touchpad or the keyboard (1,2,3,4) to classify
   - Automatic panel progression and highlighting
   - Previous panels are disabled to maintain classification flow
   - Reset option using ESC key for correcting mistakes
@@ -50,8 +51,8 @@ cd DwarfClass
   - `python classify_multiple_views_random_order.py`
 
 5. Classification Process:
-    - Answer whether the image shows a dwarf galaxy (No/Maybe/Yes)
-    - If "Maybe" or "Yes", classify the morphology (dE, dEN, dI, dIN)
+    - Answer whether the image shows a dwarf galaxy (Yes/Maybe/No)
+    - If "Yes" or "Maybe", classify the morphology (dE, dEN, dI, dIN)
     - Identify any special features (Globular Clusters (GCs), interacting/tidally disturbed, defaults to "No")
     - Add optional comments in the comment box
     - Finally, confirm classifications with Enter key
