@@ -82,6 +82,8 @@ cd DwarfClass
 
 - Remarks:
   - There are only very few examples for nucleated dwarf irregulars (dIN) in MATLAS
+  - Some morphologies may seem different in MATLAS and UNIONS due to varying observing conditions
+  - In general: if the galaxy appears smooth -> dE, if there are any features/star forming regions -> dI
   - The colors in the Legacy survey images should not be relied upon for morphological classification; all dwarfs look blue in these images
   
 
