@@ -6,7 +6,17 @@ import tkinter as tk
 from tkinter import ttk
 
 import h5py
+import matplotlib
+
+
+matplotlib.use('Agg')
+import platform
+
 import matplotlib.pyplot as plt
+
+
+if platform.system() == 'Darwin':  # macOS
+    os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 import numpy as np
 from PIL import Image, ImageDraw, ImageTk
 from astropy.visualization import simple_norm
