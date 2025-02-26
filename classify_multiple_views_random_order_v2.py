@@ -818,6 +818,7 @@ class ImageClassificationApp:
         # Get current object ID from the randomized list
         current_obj_index = self.unclassified_indices[self.random_index_ptr]
         current_obj_id = self.h5_data['native']['known_id'][current_obj_index].decode('utf-8')
+        print(current_obj_index + 2)
 
         if self.show_object_id:
             self.master.title(
