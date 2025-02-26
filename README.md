@@ -16,8 +16,9 @@ DwarfClass is a specialized tool for generating expert labels of dwarf galaxies.
   - Comment box for additional observations
   - Flexible input dynamic:
     - Option 1: use `classify_multiple_views_random_order.py` with Enter key confirmation at the end of the classifications
-    - Option 2: use `classify_multiple_views_random_order_v2.py` with automatic progression to the next image and more intuitive visual feedback
+    - Option 2: use `classify_multiple_views_random_order_v2.py` with automatic progression to the next image
   - Randomized image order to prevent bias
+  - Line number indicating object position is printed as a mechanic to correct errors once the classification was already locked in
 
 - Progress persistence:
   - Classifications are automatically saved
@@ -50,13 +51,14 @@ cd DwarfClass
     - legacy_data_dir (should contain train_cutouts_legacy and train_cutouts_legacy_enh subdirectories)
 
 4. Start the application:
-  - `python classify_multiple_views_random_order.py`
+  - Version 1 (confirm by Enter): `python classify_multiple_views_random_order.py`
+  - Version 2 (automatic progression): `python classify_multiple_views_random_order_v2.py`
 
 5. Classification Process:
     - Answer whether the image shows a dwarf galaxy (Yes/Maybe/No)
     - If "Yes" or "Maybe", classify the morphology (dE, dEN, dI, dIN)
-    - Identify any special features (Globular Clusters (GCs), interacting/tidally disturbed, defaults to "No")
     - Add optional comments in the comment box
+    - Identify any special features (Globular Clusters (GCs), interacting/tidally disturbed, defaults to "No")
     - If you're using standard script:
       - Finally, confirm classifications with Enter key
     - If you're using `v2` script:
@@ -84,8 +86,9 @@ cd DwarfClass
 
 - **Randomized Image Order**: Images are presented in random order each time the application starts to prevent classification bias
 - **Progress Tracking**: The application remembers which objects have been classified
-- **Efficient Workflow**: Default "No" for special features allows quick progression through typical cases
-- **Flexible Input**: Complete control over classification process with ability to correct mistakes
+- Standard script only:
+  - **Efficient Workflow**: Default "No" for special features allows quick progression through typical cases
+  - **Flexible Input**: Complete control over classification process with ability to correct mistakes
 
 ## Morphology examples from MATLAS
 

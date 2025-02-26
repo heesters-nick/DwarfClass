@@ -61,6 +61,8 @@ class ImageClassificationApp:
         self.with_morphology = with_morphology
         self.show_object_id = show_object_id
 
+        self.canvas_height_proportion = 0.79  # 79% of window height for canvas
+
         # Prepopulate CSV if needed
         self.prepopulate_csv_if_needed()
 
@@ -92,7 +94,8 @@ class ImageClassificationApp:
         self.current_special_feature = 'No'  # Default to 'No'
 
         # Make the main window expand
-        self.master.grid_rowconfigure(0, weight=1)
+        self.master.grid_rowconfigure(0, weight=3)  # Increase weight for image row
+        self.master.grid_rowconfigure(1, weight=1)  # Add weight for button row
         self.master.grid_columnconfigure(0, weight=1)
         self.master.grid_columnconfigure(1, weight=1)
         self.master.grid_columnconfigure(2, weight=1)
@@ -136,12 +139,17 @@ class ImageClassificationApp:
         # Create canvas to display images
         self.canvas = tk.Canvas(master)
         self.canvas.grid(row=0, column=0, columnspan=3, sticky='nsew')
+        self.canvas.grid_propagate(False)  # Prevent automatic resizing
 
         # Create classification buttons
         self.create_button_frames()
 
         # Bind keys
         self.bind_keys()
+
+        # Initial layout update
+        self.master.update_idletasks()  # Ensure window dimensions are correct
+        self.update_layout()
 
         # Display the first set of images
         self.display_image()
@@ -187,74 +195,56 @@ class ImageClassificationApp:
         return unclassified
 
     def create_button_frames(self):
-        """Create frames for classification buttons and comment box"""
-        # Main container frame with FIXED HEIGHT
+        """Create frames for classification buttons and comment box with a layout
+        that will precisely align with the image grid above."""
+        # Main container frame that will be positioned to match the image grid
         self.button_frame = ttk.Frame(self.master)
-        self.button_frame.grid(row=1, column=0, columnspan=3, sticky='ew', padx=20)
+        # We'll position this precisely with place() in update_layout
 
-        # Set a minimum height for button_frame to prevent shifting
-        self.button_frame.grid_propagate(False)  # Prevent automatic resizing
-        self.button_frame.configure(height=280)
+        # Top status bar
+        status_frame = ttk.Frame(self.button_frame)
+        status_frame.pack(fill='x', pady=(2, 5))
 
-        # Configure weights for centering
-        self.button_frame.columnconfigure(0, weight=1)  # Left padding
-        self.button_frame.columnconfigure(1, weight=2)  # Panels
-        self.button_frame.columnconfigure(2, weight=0)  # Comment box
-        self.button_frame.columnconfigure(3, weight=1)  # Right padding
-
-        # Add status label
         self.status_label = ttk.Label(
-            self.button_frame,
-            text='Currently classifying: Dwarf status',
-            anchor='center',
+            status_frame, text='Currently classifying: Dwarf status', anchor='center'
         )
-        self.status_label.grid(row=0, column=0, columnspan=4, sticky='ew', pady=(5, 5))
+        self.status_label.pack(fill='x')
 
-        # Create panels container with FIXED HEIGHT
-        panels_container = ttk.Frame(self.button_frame)
-        panels_container.grid(row=1, column=1, sticky='ew')
-        panels_container.configure(height=230)
-        panels_container.grid_propagate(False)  # Enforce fixed height
+        # Create a container frame for panels and comment box
+        content_frame = ttk.Frame(self.button_frame)
+        content_frame.pack(fill='both', expand=True, padx=0, pady=0)
 
-        # Create comment box frame with FIXED DIMENSIONS
-        comment_frame = ttk.LabelFrame(self.button_frame, text='Comments')
-        comment_frame.grid(row=1, column=2, sticky='nsew', padx=(20, 0))
-        comment_frame.configure(width=200, height=230)
-        comment_frame.grid_propagate(False)  # Enforce fixed dimensions
+        # Configure the content frame to have a 2/3 - 1/3 split for panels vs comment
+        # This matches the 2x3 grid pattern of images (2 columns for panels, 1 for comments)
+        content_frame.columnconfigure(0, weight=2)  # Panels (2/3 width)
+        content_frame.columnconfigure(1, weight=1)  # Comment box (1/3 width)
 
-        # Create and configure the comment box with FIXED SIZE
-        self.comment_box = tk.Text(comment_frame, width=30, height=10)
+        # Panels container (left 2/3)
+        panels_container = ttk.Frame(content_frame)
+        panels_container.grid(row=0, column=0, sticky='nsew', padx=(0, 5))
+
+        # Comment box frame (right 1/3)
+        comment_frame = ttk.LabelFrame(content_frame, text='Comments')
+        comment_frame.grid(row=0, column=1, sticky='nsew', padx=(5, 0))
+
+        # Create and configure the comment box
+        self.comment_box = tk.Text(comment_frame, width=25, height=8)
         self.comment_box.pack(fill='both', expand=True, padx=5, pady=5)
-
-        # Bind Tab key to move focus out of comment box
         self.comment_box.bind('<Tab>', self.handle_tab)
-
-        # Bind Enter in comment box
         self.comment_box.bind('<Return>', self.handle_enter)
 
-        # Create panels with FIXED OUTER DIMENSIONS
-        # The key is to use place manager for the buttons inside each panel
-        # to ensure they don't move when the panel's border changes
-
-        # Primary panel (Dwarf classification)
+        # Create the classification panels
         self.primary_panel = ttk.LabelFrame(panels_container, text='Is this a dwarf galaxy?')
-        self.primary_panel.pack(fill='x', pady=(0, 5))
-        self.primary_panel.configure(height=70)  # Fixed height
-
-        # Create dwarf classification buttons
+        self.primary_panel.pack(fill='x', pady=(0, 2))
         self.create_dwarf_buttons()
 
-        # Create morphology panel if enabled
         if self.with_morphology:
             self.morphology_panel = ttk.LabelFrame(panels_container, text='What is the morphology?')
-            self.morphology_panel.pack(fill='x', pady=(5, 0))
-            self.morphology_panel.configure(height=70)  # Fixed height
+            self.morphology_panel.pack(fill='x', pady=2)
             self.create_morphology_buttons()
 
-        # Create special features panel
         self.special_features_panel = ttk.LabelFrame(panels_container, text='Any special features?')
-        self.special_features_panel.pack(fill='x', pady=(5, 0))
-        self.special_features_panel.configure(height=70)  # Fixed height
+        self.special_features_panel.pack(fill='x', pady=(2, 0))
         self.create_special_features_buttons()
 
         if self.with_morphology:
@@ -752,26 +742,37 @@ class ImageClassificationApp:
 
     def calculate_dimensions(self):
         """
-        Calculate dimensions ensuring square cutouts and space for buttons.
+        Calculate dimensions ensuring square cutouts that fit within the canvas,
+        respecting the canvas_height_proportion.
         """
         window_width = max(800, self.master.winfo_width())
         window_height = max(600, self.master.winfo_height())
 
-        # Reserve more space for classification buttons to avoid overlap
-        button_space = 280
+        # Get the actual canvas height based on the proportion
+        canvas_height = int(window_height * self.canvas_height_proportion)
 
-        # Calculate spacing
+        # Calculate available space within the canvas (with margins)
+        margin = 20  # Margin around the grid
+        available_width = window_width - (2 * margin)
+        available_height = canvas_height - (2 * margin)
+
+        # Calculate spacing for the grid
         total_horizontal_spacing = self.horizontal_spacing * (self.num_cols - 1)
         total_vertical_spacing = self.vertical_spacing * (self.num_rows - 1)
 
-        # Available space for cutouts after reserving button space
-        available_width = window_width - 40 - total_horizontal_spacing
-        available_height = window_height - button_space - 40 - total_vertical_spacing
+        # Available space for cells after accounting for spacing
+        cell_area_width = available_width - total_horizontal_spacing
+        cell_area_height = available_height - total_vertical_spacing
 
-        # Calculate cell size to ensure squares
-        width_per_cell = available_width // self.num_cols
-        height_per_cell = available_height // self.num_rows
+        # Calculate max cell size that fits within the available space
+        width_per_cell = cell_area_width // self.num_cols
+        height_per_cell = cell_area_height // self.num_rows
+
+        # Use the smaller dimension to ensure square cells that fit
         cell_size = min(width_per_cell, height_per_cell)
+
+        # Ensure a minimum cell size for visibility
+        cell_size = max(cell_size, 50)  # Minimum 50px cells
 
         self.cell_width = cell_size
         self.cell_height = cell_size
@@ -782,7 +783,7 @@ class ImageClassificationApp:
 
     def on_resize(self, event):
         """
-        Handle window resize events
+        Handle window resize events by updating the layout
         """
         if event.widget == self.master:
             self.master.after(100, self.handle_resize)
@@ -791,7 +792,8 @@ class ImageClassificationApp:
         """
         Update display after resize
         """
-        self.calculate_dimensions()
+        # Update the layout first, then calculate dimensions and display the image
+        self.update_layout()
         self.display_image()
 
     def count_valid_classifications(self):
@@ -1009,8 +1011,14 @@ class ImageClassificationApp:
             composite.paste(cell_img, (x_offset, y_offset))
 
         self.photo = ImageTk.PhotoImage(composite)
-        x_center = (self.master.winfo_width() - self.composite_width) // 2
-        y_center = 20
+        if hasattr(self, 'image_x') and hasattr(self, 'image_y'):
+            x_center = self.image_x
+            y_center = self.image_y
+        else:
+            # Fallback if update_layout hasn't been called yet
+            x_center = (self.master.winfo_width() - self.composite_width) // 2
+            y_center = (self.canvas.winfo_height() - self.composite_height) // 2
+
         self.canvas.create_image(x_center, y_center, anchor=tk.NW, image=self.photo)
 
     def save_classification(self):
@@ -1184,6 +1192,58 @@ class ImageClassificationApp:
 
         # Update status label
         self.status_label.configure(text='All images have been classified!', foreground='gray50')
+
+    def update_layout(self):
+        """
+        Update the layout to properly size the canvas and button sections based on
+        the canvas_height_proportion.
+        """
+        # Get current window dimensions
+        window_width = self.master.winfo_width()
+        window_height = self.master.winfo_height()
+
+        # Calculate canvas height based on proportion
+        canvas_height = int(window_height * self.canvas_height_proportion)
+
+        # Set canvas height and prevent auto-expansion
+        self.canvas.configure(height=canvas_height)
+        self.canvas.grid_propagate(False)
+
+        # Recalculate dimensions to fit within the canvas
+        self.calculate_dimensions()
+
+        # Button section takes the remaining height
+        button_height = window_height - canvas_height
+
+        # Center the image grid horizontally
+        image_x = (window_width - self.composite_width) // 2
+
+        # Center the image grid vertically within the canvas
+        image_y = (canvas_height - self.composite_height) // 2
+
+        # Store these for display_image to use
+        self.image_x = image_x
+        self.image_y = image_y
+
+        # Place the button frame precisely aligned with the image grid
+        self.button_frame.place(
+            x=image_x,
+            y=canvas_height,  # Position exactly at the bottom of the canvas
+            width=self.composite_width,
+            height=button_height,
+        )
+
+        # Calculate panel heights based on available space
+        panel_container_height = max(120, button_height - 35)  # At least 120px high
+        panel_height = (
+            panel_container_height // 3 if self.with_morphology else panel_container_height // 2
+        )
+
+        # Update panel heights
+        self.primary_panel.configure(height=panel_height)
+        if self.with_morphology:
+            self.morphology_panel.configure(height=panel_height)
+        self.special_features_panel.configure(height=panel_height)
 
 
 if __name__ == '__main__':
