@@ -74,8 +74,9 @@ cd DwarfClass
 
 - Classifications are saved in `classification_results.csv` in the main directory
 - Important: Keep this file in the main directory until the classification run is complete
+- Create a new directory to save your completed classifications
 - After completing a run:
-    1. Move the file to your classifications directory
+    1. Move the file to your completed classifications directory
     2. Rename it to `classification_results_[INITIALS]_[RUN NUMBER].csv`
         - Example: `classification_results_NH_1.csv`
 
