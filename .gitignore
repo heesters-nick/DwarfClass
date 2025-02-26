@@ -10,3 +10,4 @@ notebooks
 ruff.toml
 *.lock
 classifications/
+classification_results*
