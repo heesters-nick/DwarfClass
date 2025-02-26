@@ -14,7 +14,9 @@ DwarfClass is a specialized tool for generating expert labels of dwarf galaxies.
   - Previous panels are disabled to maintain classification flow
   - Reset option using ESC key for correcting mistakes
   - Comment box for additional observations
-  - Enter key confirmation at the end of the classifications
+  - Flexible input dynamic:
+    - Option 1: use `classify_multiple_views_random_order.py` with Enter key confirmation at the end of the classifications
+    - Option 2: use `classify_multiple_views_random_order_v2.py` with automatic progression to the next image and more intuitive visual feedback
   - Randomized image order to prevent bias
 
 - Progress persistence:
@@ -55,20 +57,25 @@ cd DwarfClass
     - If "Yes" or "Maybe", classify the morphology (dE, dEN, dI, dIN)
     - Identify any special features (Globular Clusters (GCs), interacting/tidally disturbed, defaults to "No")
     - Add optional comments in the comment box
-    - Finally, confirm classifications with Enter key
+    - If you're using standard script:
+      - Finally, confirm classifications with Enter key
+    - If you're using `v2` script:
+      - Automatically progress to the next image once classification are complete
     
 6. Navigation:
-    - Press Enter to confirm and move to next image
     - If you have made a mistake: press ESC to reset current classification
-    - Type in comment box and press Enter to confirm if all other classifications are complete
-    - Press Tab to get out of comment box if current classification is incomplete
+    - Standard script:
+      - Comment box can be acessed at any time during the classification process
+    - `v2` script:
+      - Comment box should be accessed either before starting the classification or before it is complete due to automatic progression
+    - Press Tab to get out of comment box
 
 ## Data Management
 
 - Classifications are saved in `classification_results.csv` in the main directory
 - Important: Keep this file in the main directory until the classification run is complete
 - After completing a run:
-    1.  Move the file to your classifications directory
+    1. Move the file to your classifications directory
     2. Rename it to `classification_results_[INITIALS]_[RUN NUMBER].csv`
         - Example: `classification_results_NH_1.csv`
 

@@ -374,7 +374,7 @@ class ImageClassificationApp:
         self.status_label.configure(text='Classification saved, moving to next image...')
 
         # Auto-save with a short delay for visual feedback
-        self.master.after(800, self.save_classification)
+        self.master.after(200, self.save_classification)
 
     def reset_special_features(self):
         """Reset special features to default state"""
@@ -551,7 +551,7 @@ class ImageClassificationApp:
             # Auto-save with delay
             self.current_morphology = None
             self.current_special_feature = 'No'
-            self.master.after(800, self.save_classification)  # Delay to show feedback
+            self.master.after(200, self.save_classification)  # Delay to show feedback
         else:  # Dwarf or Maybe Dwarf
             if not self.with_morphology:
                 # If morphology is disabled, grey out panel and auto-save
@@ -567,7 +567,7 @@ class ImageClassificationApp:
 
                 self.current_morphology = None
                 self.current_special_feature = 'No'
-                self.master.after(800, self.save_classification)
+                self.master.after(200, self.save_classification)
             else:
                 # Grey out primary panel, activate morphology
                 self.primary_panel.configure(style='Inactive.TLabelframe')
