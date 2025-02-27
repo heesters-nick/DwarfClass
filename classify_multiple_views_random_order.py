@@ -45,6 +45,7 @@ class ImageClassificationApp:
         csv_file,
         with_morphology=False,
         show_object_id=False,
+        fraction_img_grid=0.75,
     ):
         """
         Initialize the image classification application.
@@ -54,12 +55,16 @@ class ImageClassificationApp:
             h5_data: Dictionary containing HDF5 data for the four versions
             legacy_dirs: Dictionary containing paths to directories for JPEG images
             csv_file: Path to the CSV file for saving classifications
+            with_morphology: Whether to include morphology classification
+            show_object_id: Whether to show the object ID in the window title
+            fraction_img_grid: Fraction of window height to use for the image grid
         """
         self.master = master
         self.h5_data = h5_data
         self.csv_file = csv_file
         self.with_morphology = with_morphology
         self.show_object_id = show_object_id
+        self.fraction_img_grid = fraction_img_grid  # Fraction of window height for image grid
 
         # Prepopulate CSV if needed
         self.prepopulate_csv_if_needed()
@@ -89,8 +94,6 @@ class ImageClassificationApp:
 
         # Add current_special_feature to track the third question's answer
         self.current_special_feature = 'No'  # Default to 'No'
-
-        self.canvas_height_proportion = 0.79  # 80% of window height
 
         # Make the main window expand
         self.master.grid_rowconfigure(0, weight=3)  # Increase weight for image row
@@ -704,13 +707,13 @@ class ImageClassificationApp:
     def calculate_dimensions(self):
         """
         Calculate dimensions ensuring square cutouts that fit within the canvas,
-        respecting the canvas_height_proportion.
+        respecting the fraction_img_grid constraint.
         """
         window_width = max(800, self.master.winfo_width())
         window_height = max(600, self.master.winfo_height())
 
         # Get the actual canvas height based on the proportion
-        canvas_height = int(window_height * self.canvas_height_proportion)
+        canvas_height = int(window_height * self.fraction_img_grid)
 
         # Calculate available space within the canvas (with margins)
         margin = 20  # Margin around the grid
@@ -1157,14 +1160,14 @@ class ImageClassificationApp:
     def update_layout(self):
         """
         Update the layout to properly size the canvas and button sections based on
-        the canvas_height_proportion.
+        the fraction_img_grid parameter.
         """
         # Get current window dimensions
         window_width = self.master.winfo_width()
         window_height = self.master.winfo_height()
 
         # Calculate canvas height based on proportion
-        canvas_height = int(window_height * self.canvas_height_proportion)
+        canvas_height = int(window_height * self.fraction_img_grid)
 
         # Set canvas height and prevent auto-expansion
         self.canvas.configure(height=canvas_height)
@@ -1242,7 +1245,8 @@ if __name__ == '__main__':
         legacy_dirs,
         csv_file,
         with_morphology=True,
-        show_object_id=True,
+        show_object_id=False,
+        fraction_img_grid=0.75,
     )
     app.setup_styles()
     root.mainloop()

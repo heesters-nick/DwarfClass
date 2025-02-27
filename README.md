@@ -53,6 +53,7 @@ cd DwarfClass
 4. Start the application:
   - Version 1 (confirm by Enter): `python classify_multiple_views_random_order.py`
   - Version 2 (automatic progression): `python classify_multiple_views_random_order_v2.py`
+  - You may have to tune the parameter `fraction_img_grid` such that both the image grid and the button panels fit on the screen. The parameters controls the fraction of vertical space reserved for the image grid.
 
 5. Classification Process:
     - Answer whether the image shows a dwarf galaxy (Yes/Maybe/No)
