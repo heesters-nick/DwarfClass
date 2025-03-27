@@ -145,7 +145,7 @@ if __name__ == '__main__':
     import os
 
     # Path to the HDF5 file and CSV file
-    h5_file_path = '/home/nick/astro/dwarf_visualization/cutout_data/training_data/lsb_gri_prep.h5'
+    h5_file_path = '/home/nick/astro/dwarf_visualization/cutout_data/training_data/non_dwarfs/non_dwarfs_2201_3100_unique_ids.h5'
     csv_file = 'classification_results.csv'
 
     # Read cutout data

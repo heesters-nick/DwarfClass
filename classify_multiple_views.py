@@ -7,8 +7,8 @@ from tkinter import ttk
 import h5py
 import matplotlib.pyplot as plt
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont, ImageTk
 from astropy.visualization import simple_norm
+from PIL import Image, ImageDraw, ImageFont, ImageTk
 
 
 def read_h5(file_path):
@@ -538,7 +538,7 @@ class ImageClassificationApp:
         """Convert data to PIL Image using matplotlib's rendering"""
         # Create figure with no borders/axes
         fig = plt.figure(figsize=(6, 6), frameon=False)
-        ax = plt.Axes(fig, [0.0, 0.0, 1.0, 1.0])
+        ax = plt.Axes(fig, [0.0, 0.0, 1.0, 1.0])  # type: ignore
         ax.set_axis_off()
         fig.add_axes(ax)
 

@@ -8,19 +8,17 @@ from tkinter import ttk
 import h5py
 import matplotlib
 
-
 matplotlib.use('Agg')
 import platform
 
 import matplotlib.pyplot as plt
 
-
 if platform.system() == 'Darwin':  # macOS
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 import numpy as np
-from PIL import Image, ImageDraw, ImageTk
 from astropy.visualization import simple_norm
 from filelock import FileLock
+from PIL import Image, ImageDraw, ImageTk
 
 
 def read_h5(file_path):
@@ -812,7 +810,7 @@ class ImageClassificationApp:
         """Convert data to PIL Image using matplotlib's rendering"""
         # Create figure with no borders/axes
         fig = plt.figure(figsize=(6, 6), frameon=False)
-        ax = plt.Axes(fig, [0.0, 0.0, 1.0, 1.0])
+        ax = plt.Axes(fig, [0.0, 0.0, 1.0, 1.0])  # type: ignore
         ax.set_axis_off()
         fig.add_axes(ax)
 
@@ -1246,7 +1244,7 @@ if __name__ == '__main__':
         csv_file,
         with_morphology=True,
         show_object_id=False,
-        fraction_img_grid=0.75,
+        fraction_img_grid=0.79,
     )
     app.setup_styles()
     root.mainloop()

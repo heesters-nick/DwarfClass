@@ -12,3 +12,5 @@ ruff.toml
 classifications/
 classification_results*
 *copy.py
+tile_info/
+requirements_dwarfvision.txt
