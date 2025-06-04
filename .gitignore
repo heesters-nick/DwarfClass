@@ -14,3 +14,7 @@ classification_results*
 *copy.py
 tile_info/
 requirements_dwarfvision.txt
+models/
+detection_dfs/
+fits_data/
+test_fields/
